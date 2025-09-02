@@ -49,9 +49,9 @@ public class User {
 
     @ManyToMany
     @JoinTable(
-        name = "wishlist",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "product_id")
+            name = "wishlist",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id")
     )
     private Set<Product> favoriteProducts = new HashSet<>();
 
@@ -65,5 +65,11 @@ public class User {
                 "id = " + id + ", " +
                 "name = " + name + ", " +
                 "email = " + email + ")";
+    }
+
+    public User(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
     }
 }
