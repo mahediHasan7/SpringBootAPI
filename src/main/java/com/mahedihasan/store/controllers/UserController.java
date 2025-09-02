@@ -8,6 +8,7 @@ import com.mahedihasan.store.entities.User;
 import com.mahedihasan.store.mappers.UserMapper;
 import com.mahedihasan.store.repositories.ProductRepository;
 import com.mahedihasan.store.repositories.UserRepository;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -47,10 +49,14 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(
-            @RequestBody RegisterUserRequest request,
+    public ResponseEntity<?> createUser(
+            @Valid @RequestBody RegisterUserRequest request,
             UriComponentsBuilder uriBuilder) {
 
+        boolean userExists = userRepository.existsUserByEmail(request.getEmail());
+        if (userExists) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("email:", "A user already registered with this email"));
+        }
         User user = userMapper.toEntity(request);
         userRepository.save(user);
 
@@ -61,7 +67,7 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(
             @PathVariable(name = "id") Long id,
-            @RequestBody UpdateUserRequest request) {
+            @Valid @RequestBody UpdateUserRequest request) {
 
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
@@ -90,7 +96,7 @@ public class UserController {
     }
 
     @PostMapping("/{id}/change-password")
-    ResponseEntity<String> updateUserPassword(@PathVariable Long id, @RequestBody ChangePasswordRequest request) {
+    ResponseEntity<String> updateUserPassword(@PathVariable Long id, @Valid @RequestBody ChangePasswordRequest request) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
             return ResponseEntity.notFound().build();
@@ -104,5 +110,4 @@ public class UserController {
         userRepository.save(user);
         return ResponseEntity.ok("Password has been changed");
     }
-
 }
